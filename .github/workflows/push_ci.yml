@@ -16,3 +16,27 @@ jobs:
       STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
       OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
       CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+  # тестовые сборки ветки vegas-ui сразу выкладываются в Releases: прямая ссылка на APK без архивов
+  Publish-Test:
+    needs: Build
+    if: success() && github.ref_name == 'vegas-ui'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: ./artifacts
+      - name: Collect APKs
+        run: |
+          mkdir -p ./apks
+          find ./artifacts -name "*.apk" -type f -exec cp {} ./apks/ \;
+          ls -la ./apks
+      - uses: softprops/action-gh-release@v3
+        with:
+          tag_name: vegas-test
+          name: Тестовая сборка (vegas-ui)
+          body: "Тестовая debug-сборка из ветки vegas-ui. Для большинства телефонов бери файл с arm64 в названии. Коммит: ${{ github.sha }}"
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+          files: ./apks/*.apk
