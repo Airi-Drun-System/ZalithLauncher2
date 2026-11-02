@@ -27,7 +27,9 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -171,19 +173,15 @@ fun MainScreen(
         color = backgroundColor,
         contentColor = onBackgroundColor()
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
+        // слева узкая полоса разделов, справа текущий экран («Витрина сборок»)
+        Row(
+            modifier = Modifier.fillMaxSize()
         ) {
-            TopBar(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp),
+            SideRail(
                 mainScreenKey = mainScreenKey,
                 inLauncherScreen = inLauncherScreen,
                 taskRunning = taskRunning,
                 isTasksExpanded = isTaskMenuExpanded,
-                contentColor = onBackgroundColor(),
                 onScreenBack = {
                     screenBackStackModel.mainScreen.backStack.removeFirstOrNull()
                 },
@@ -215,6 +213,21 @@ fun MainScreen(
                 },
             )
 
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+            ) {
+            AnimatedVisibility(visible = !inLauncherScreen) {
+                ScreenTitle(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(40.dp)
+                        .padding(start = 16.dp),
+                    mainScreenKey = mainScreenKey
+                )
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -243,7 +256,135 @@ fun MainScreen(
                     changeTasksExpandedState()
                 }
             }
+            }
         }
+    }
+}
+
+@Composable
+private fun <E: TitledNavKey> ScreenTitle(
+    mainScreenKey: E?,
+    modifier: Modifier = Modifier,
+) {
+    val festivals = LocalFestivals.current
+    val parentRes = mainScreenKey?.title
+    val childRes = (mainScreenKey as? BackStackNavKey<*>)?.currentKey?.title
+    Box(modifier = modifier, contentAlignment = Alignment.CenterStart) {
+        Crossfade(targetState = parentRes to childRes) { (parent, child) ->
+            val style = MaterialTheme.typography.titleMedium
+            if (parent == null) {
+                if (festivals.isEmpty()) {
+                    Text(text = BuildKeys.LAUNCHER_IDENTIFIER, style = style, maxLines = 1)
+                } else {
+                    FestivalTitleText(festivals = festivals, style = style, maxLines = 1)
+                }
+            } else {
+                val titleText = if (child != null) androidText(parent, androidText(" - "), child) else parent
+                AndroidStringText(text = titleText, style = style, softWrap = false, maxLines = 1)
+            }
+        }
+    }
+}
+
+@Composable
+private fun <E: TitledNavKey> SideRail(
+    mainScreenKey: E?,
+    inLauncherScreen: Boolean,
+    taskRunning: Boolean,
+    isTasksExpanded: Boolean,
+    onScreenBack: () -> Unit,
+    toMainScreen: () -> Unit,
+    toSettingsScreen: () -> Unit,
+    toDownloadScreen: () -> Unit,
+    toMultiplayerScreen: () -> Unit,
+    openFileManager: () -> Unit,
+    changeExpandedState: () -> Unit,
+) {
+    val inMultiplayerScreen = mainScreenKey is NormalNavKey.Multiplayer
+    val inDownloadScreen = mainScreenKey is NestedNavKey.Download
+    val inSettingsScreen = mainScreenKey is NestedNavKey.Settings
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
+
+    Column(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(68.dp)
+            .background(MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.72f))
+            .padding(vertical = 10.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        AnimatedVisibility(visible = !inLauncherScreen) {
+            RailIcon(
+                painter = painterResource(R.drawable.ic_arrow_back),
+                text = stringResource(R.string.generic_back),
+                selected = false,
+                onClick = { backDispatcher?.onBackPressed() ?: onScreenBack() }
+            )
+        }
+        RailIcon(
+            painter = painterResource(R.drawable.ic_home_filled),
+            text = stringResource(R.string.generic_main_menu),
+            selected = inLauncherScreen,
+            onClick = { if (!inLauncherScreen) toMainScreen() }
+        )
+        RailIcon(
+            painter = painterResource(R.drawable.ic_download_2_filled),
+            text = stringResource(R.string.generic_download),
+            selected = inDownloadScreen,
+            onClick = { if (!inDownloadScreen) toDownloadScreen() }
+        )
+        RailIcon(
+            painter = painterResource(R.drawable.ic_group_filled),
+            text = stringResource(R.string.terracotta),
+            selected = inMultiplayerScreen,
+            onClick = { if (!inMultiplayerScreen) toMultiplayerScreen() }
+        )
+        RailIcon(
+            painter = painterResource(R.drawable.ic_folder_filled),
+            text = null,
+            selected = false,
+            onClick = openFileManager
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        AnimatedVisibility(visible = !(isTasksExpanded || taskRunning)) {
+            RailIcon(
+                painter = painterResource(R.drawable.ic_assignment_filled),
+                text = stringResource(R.string.main_task_menu),
+                selected = false,
+                onClick = changeExpandedState
+            )
+        }
+        RailIcon(
+            painter = painterResource(R.drawable.ic_settings_filled),
+            text = stringResource(R.string.generic_setting),
+            selected = inSettingsScreen,
+            onClick = { if (!inSettingsScreen) toSettingsScreen() }
+        )
+    }
+}
+
+@Composable
+private fun RailIcon(
+    painter: Painter,
+    text: String?,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .size(46.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(if (selected) MaterialTheme.colorScheme.onSurface else Color.Transparent)
+            .clickable(onClick = onClick),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            modifier = Modifier.size(24.dp),
+            painter = painter,
+            contentDescription = text,
+            tint = if (selected) MaterialTheme.colorScheme.surface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+        )
     }
 }
 

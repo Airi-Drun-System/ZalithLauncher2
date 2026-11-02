@@ -1234,4 +1234,8 @@
     <string name="guide_editor_save">Закончив редактирование, не забудьте сохранить раскладку!</string>
     <string name="guide_tip_blank">Коснитесь пустого места, чтобы перейти к следующему шагу</string>
     <string name="guide_tip_finish">Коснитесь пустого места, чтобы завершить руководство</string>
+    <string name="showcase_title">Твои сборки</string>
+    <string name="showcase_vanilla">Чистая</string>
+    <string name="showcase_new">Новая сборка</string>
+    <string name="showcase_broken">Нужна починка</string>
 </resources>
