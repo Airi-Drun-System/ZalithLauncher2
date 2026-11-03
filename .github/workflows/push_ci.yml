@@ -10,7 +10,8 @@ jobs:
   Build:
     uses: ./.github/workflows/build.yml
     with:
-      variant: Debug
+      # release: Compose в debug-сборке тормозит в разы
+      variant: Release
     secrets:
       KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
       STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
@@ -36,7 +37,7 @@ jobs:
         with:
           tag_name: vegas-test
           name: Тестовая сборка (vegas-ui)
-          body: "Тестовая debug-сборка из ветки vegas-ui. Для большинства телефонов бери файл с arm64 в названии. Коммит: ${{ github.sha }}"
+          body: "Тестовая сборка Voxa из ветки vegas-ui. Для большинства телефонов бери файл с arm64 в названии. Коммит: ${{ github.sha }}"
           prerelease: true
           target_commitish: ${{ github.sha }}
           files: ./apks/*.apk
