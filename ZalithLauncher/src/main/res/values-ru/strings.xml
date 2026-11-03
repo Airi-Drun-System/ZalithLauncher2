@@ -1238,4 +1238,9 @@
     <string name="showcase_vanilla">Чистая</string>
     <string name="showcase_new">Новая сборка</string>
     <string name="showcase_broken">Нужна починка</string>
+    <string name="showcase_horizon_tag">Rust · 26.3</string>
+    <string name="showcase_horizon_get">Нажми, чтобы скачать</string>
+    <string name="showcase_horizon_downloading">Скачиваю %1$d%%</string>
+    <string name="showcase_horizon_install">Нажми, чтобы установить</string>
+    <string name="showcase_horizon_open">Установлен · нажми, чтобы играть</string>
 </resources>

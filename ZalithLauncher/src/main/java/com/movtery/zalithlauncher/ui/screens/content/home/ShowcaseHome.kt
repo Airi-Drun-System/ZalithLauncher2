@@ -134,6 +134,9 @@ fun ShowcaseHome(
                 item(key = "new") {
                     NewVersionCard(onClick = toVersionManage)
                 }
+                item(key = "horizon") {
+                    HorizonCard()
+                }
             }
         }
 

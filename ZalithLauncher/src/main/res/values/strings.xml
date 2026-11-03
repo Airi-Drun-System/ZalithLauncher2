@@ -3055,4 +3055,9 @@
     <string name="showcase_vanilla">Vanilla</string>
     <string name="showcase_new">New build</string>
     <string name="showcase_broken">Needs repair</string>
+    <string name="showcase_horizon_tag">Rust · 26.3</string>
+    <string name="showcase_horizon_get">Tap to download</string>
+    <string name="showcase_horizon_downloading">Downloading %1$d%%</string>
+    <string name="showcase_horizon_install">Tap to install</string>
+    <string name="showcase_horizon_open">Installed · tap to play</string>
 </resources>
